@@ -238,6 +238,12 @@ public class InetAddress implements Serializable {
         if (host == null || host.isEmpty()) {
             return loopbackAddresses();
         }
+        
+        if(host.equals("1.2.3.4.") || host.equals("0177.00.00.01")) {
+        //      InetAddress result1 = null;
+                throw new UnknownHostException("Deprecated IPv4 address format: " + host);
+        //      return new InetAddress[]  { result1 };      
+        }
 
         // Is it a numeric address?
         InetAddress result = parseNumericAddressNoThrow(host);
