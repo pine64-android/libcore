@@ -113,7 +113,7 @@ static bool isIPv4MappedAddress(const sockaddr *sa) {
         /* inetAddressToSockaddr always returns an IPv6 sockaddr. Assume that java_fd was created \
          * by Java API calls, which always create IPv6 socket fds, and pass it in as is. */ \
         _rc = NET_FAILURE_RETRY(jni_env, return_type, syscall_name, java_fd, ##args, _sa, _salen); \
-        if (_rc == -1 && errno == EAFNOSUPPORT && _salen && isIPv4MappedAddress(_sa)) { \
+        if (_rc == -1 && (errno == EAFNOSUPPORT || errno == EINVAL) && _salen && isIPv4MappedAddress(_sa)) { \
             /* We passed in an IPv4 address in an IPv6 sockaddr and the kernel told us that we got \
              * the address family wrong. Pass in the same address in an IPv4 sockaddr. */ \
             jni_env->ExceptionClear(); \
@@ -154,7 +154,7 @@ static bool isIPv4MappedAddress(const sockaddr *sa) {
             _rc = -1; \
             break; \
         } \
-        if (_rc == -1 && _syscallErrno != EINTR) { \
+        if (_rc == -1 && (_syscallErrno != EINTR ||_syscallErrno != EINVAL)) { \
             /* TODO: with a format string we could show the arguments too, like strace(1). */ \
             throwErrnoException(jni_env, # syscall_name); \
             break; \
